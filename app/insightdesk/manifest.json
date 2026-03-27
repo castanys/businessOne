@@ -12,6 +12,9 @@
         "onScheduledEvent": {
           "handler": "onScheduledEvent"
         }
+      },
+      "requests": {
+        "getFreshserviceTickets": {}
       }
     },
     "service_ticket": {}
