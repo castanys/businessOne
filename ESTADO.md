@@ -2,7 +2,7 @@
 
 **Propósito**: Estado mínimo del proyecto — lo que Claude debe saber antes de empezar una sesión.
 
-**Última actualización**: 2026-03-27 — S1 en curso
+**Última actualización**: 2026-03-27 — S1 completada
 
 ---
 
@@ -10,15 +10,16 @@
 
 | Métrica | Valor |
 |---------|-------|
-| **Estado** | Fase 0: Investigación de mercado |
-| **Producto** | Por definir |
+| **Estado** | Fase 1: MVP en desarrollo |
+| **Producto** | InsightDesk — Freshservice Analytics App |
+| **Trial FS** | insightdesk.freshservice.com (14 días desde 2026-03-27) |
 | **Revenue** | $0 |
 
 ---
 
 ## Decisiones Arquitectónicas
 
-0 decisiones documentadas → ver `ARQUITECTURA.md` o ejecutar `/arquitectura-proyecto`
+4 decisiones documentadas → ver `ARQUITECTURA.md` o ejecutar `/arquitectura-proyecto`
 
 ---
 
@@ -26,9 +27,11 @@
 
 | Prioridad | Tarea | Notas |
 |-----------|-------|-------|
-| ALTA | Investigar marketplaces (Freshservice, Chrome, Shopify) para gaps reales | Buscar evidencia de demanda, no opiniones |
-| ALTA | Validar nicho B2B con datos concretos | Precios competencia, búsquedas, quejas en foros |
-| MEDIA | Elegir producto MVP basado en evidencia | Tras completar investigación |
+| ALTA | Testing app con `fdk run` contra insightdesk.freshservice.com | Necesita API key de FS |
+| ALTA | Solicitar developer subscription (trial expira en 14 días) | Email a paid-apps@community.freshworks.dev |
+| MEDIA | Resolver warnings del linter (38 warnings) | No bloqueantes pero necesarios para review |
+| MEDIA | Preparar assets y listing para marketplace | Logo, screenshots, descripción |
+| BAJA | Activar `nvm use 18` como admin para simplificar workflow | Actualmente usando path directo a Node 18 |
 
 **Nota**: Borrar pendientes cuando se completen. No acumular aquí.
 
@@ -38,4 +41,4 @@
 
 | Sesión | Fecha | Resultado | Cambios |
 |--------|-------|-----------|---------|
-| S1 | 2026-03-27 | EN CURSO | Proyecto inicializado, investigación de mercado en progreso |
+| S1 | 2026-03-27 | COMPLETADA | Investigación mercado + MVP diseñado + app scaffolding completo |
