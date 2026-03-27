@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>InsightDesk — Freshservice Analytics</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script async src="{{{appclient}}}"></script>
+    <link rel="stylesheet" type="text/css" href="styles/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+  </head>
+
+  <body>
+    <div id="app">
+      <header class="header">
+        <h1>InsightDesk</h1>
+        <p class="subtitle">Freshservice Analytics</p>
+      </header>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-value" id="kpi-open">--</div>
+          <div class="kpi-label">Open Tickets</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value" id="kpi-new">--</div>
+          <div class="kpi-label">New / day (avg)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value" id="kpi-sla">--</div>
+          <div class="kpi-label">SLA %</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value" id="kpi-mttr">--</div>
+          <div class="kpi-label">MTTR (hours)</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3>Ticket Volume (30 days)</h3>
+          <canvas id="chart-volume"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>SLA Compliance Trend</h3>
+          <canvas id="chart-sla"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Top Categories</h3>
+          <canvas id="chart-categories"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Agent Workload</h3>
+          <canvas id="chart-agents"></canvas>
+        </div>
+      </div>
+
+      <div class="status-bar" id="status-bar">Loading data...</div>
+    </div>
+
+    <script defer src="scripts/app.js"></script>
+    <script async type="module" src="https://cdn.jsdelivr.net/npm/@freshworks/crayons@v4/dist/crayons/crayons.esm.js"></script>
+    <script async nomodule src="https://cdn.jsdelivr.net/npm/@freshworks/crayons@v4/dist/crayons/crayons.js"></script>
+  </body>
+</html>

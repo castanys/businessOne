@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp",
+        "--browser", "msedge",
+        "--caps", "vision,pdf",
+        "--user-data-dir", "c:/Users/casta/proyectos/businessOne/data/browser_profile",
+        "--ignore-https-errors",
+        "--output-dir", "c:/Users/casta/proyectos/businessOne/data/playwright_output"
+      ]
+    }
+  }
+}

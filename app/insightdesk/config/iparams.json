@@ -1,0 +1,15 @@
+{
+  "freshservice_domain": {
+    "display_name": "Freshservice Domain",
+    "description": "Your Freshservice subdomain (e.g. 'insightdesk' for insightdesk.freshservice.com)",
+    "type": "text",
+    "required": true
+  },
+  "freshservice_api_key": {
+    "display_name": "Freshservice API Key",
+    "description": "Your Freshservice API key (Admin > Profile > View API Key)",
+    "type": "text",
+    "required": true,
+    "secure": true
+  }
+}

@@ -1,0 +1,6 @@
+node_modules/
+.fdk/
+log/
+data/browser_profile/
+data/playwright_output/
+*.png
