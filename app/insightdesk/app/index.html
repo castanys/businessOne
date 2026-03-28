@@ -13,10 +13,10 @@
     <div id="app">
       <header class="header">
         <h1>InsightDesk</h1>
-        <p class="subtitle">Freshservice Analytics</p>
+        <p class="subtitle">Freshservice Analytics — Metrics that Freshservice doesn't show you</p>
       </header>
 
-      <!-- KPI Cards -->
+      <!-- KPI Cards Row 1 -->
       <div class="kpi-grid">
         <div class="kpi-card">
           <div class="kpi-value" id="kpi-open">--</div>
@@ -28,31 +28,63 @@
         </div>
         <div class="kpi-card">
           <div class="kpi-value" id="kpi-sla">--</div>
-          <div class="kpi-label">SLA %</div>
+          <div class="kpi-label">SLA Compliance</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-value" id="kpi-mttr">--</div>
           <div class="kpi-label">MTTR (hours)</div>
         </div>
+        <div class="kpi-card">
+          <div class="kpi-value" id="kpi-frt">--</div>
+          <div class="kpi-label">First Response (med)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value" id="kpi-reopen">--</div>
+          <div class="kpi-label">Reopened %</div>
+        </div>
       </div>
 
-      <!-- Charts -->
+      <!-- Charts Row 1 -->
       <div class="charts-grid">
         <div class="chart-card">
           <h3>Ticket Volume (30 days)</h3>
           <canvas id="chart-volume"></canvas>
         </div>
         <div class="chart-card">
-          <h3>SLA Compliance Trend</h3>
-          <canvas id="chart-sla"></canvas>
+          <h3>Resolution Time Distribution</h3>
+          <canvas id="chart-resolution"></canvas>
         </div>
+      </div>
+
+      <!-- Charts Row 2 -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3>SLA Compliance by Priority</h3>
+          <canvas id="chart-sla-priority"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Ticket Source</h3>
+          <canvas id="chart-source"></canvas>
+        </div>
+      </div>
+
+      <!-- Charts Row 3 -->
+      <div class="charts-grid">
         <div class="chart-card">
           <h3>Top Categories</h3>
           <canvas id="chart-categories"></canvas>
         </div>
         <div class="chart-card">
-          <h3>Agent Workload</h3>
-          <canvas id="chart-agents"></canvas>
+          <h3>Agent Performance</h3>
+          <div id="agent-table-container"></div>
+        </div>
+      </div>
+
+      <!-- Problem Tickets Table -->
+      <div class="table-card">
+        <h3>Problem Tickets — Slowest Resolution & Reopened</h3>
+        <div id="problem-table-container">
+          <p class="empty-msg">No data available yet</p>
         </div>
       </div>
 
