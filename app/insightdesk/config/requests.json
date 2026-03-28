@@ -6,7 +6,7 @@
       "host": "<%= iparam.freshservice_domain %>.freshservice.com",
       "path": "/api/v2/tickets",
       "headers": {
-        "Authorization": "Basic <%= encode(iparam.freshservice_api_key) %>",
+        "Authorization": "Basic <%= encode(iparam.freshservice_api_key + ':X') %>",
         "Content-Type": "application/json"
       }
     }

@@ -3,19 +3,13 @@
  *
  * Handles scheduled data collection from Freshservice API
  * and stores aggregated metrics in Entity Storage.
+ *
+ * Entity Storage API (Platform 3.0):
+ *   $db.set(key, { data }) → create/update
+ *   $db.get(key) → read
+ *   $db.delete(key) → delete
  */
 
-const ENTITIES = {
-  DAILY_METRICS: 'daily_metrics',
-  CATEGORY_METRICS: 'category_metrics',
-  AGENT_METRICS: 'agent_metrics',
-  SLA_METRICS: 'sla_metrics',
-  APP_CONFIG: 'app_config'
-};
-
-/**
- * Scheduled event handler — runs daily to collect and aggregate ticket data
- */
 exports = {
 
   onScheduledEvent: async function() {
@@ -25,6 +19,12 @@ exports = {
     try {
       // 1. Fetch tickets from Freshservice API
       const tickets = await fetchAllTickets();
+      console.info(`[InsightDesk] Fetched ${tickets.length} tickets`);
+
+      if (tickets.length === 0) {
+        console.info('[InsightDesk] No tickets found, skipping storage');
+        return;
+      }
 
       // 2. Aggregate metrics
       const dailyMetrics = aggregateDailyMetrics(tickets, today);
@@ -32,23 +32,21 @@ exports = {
       const agentMetrics = aggregateAgentMetrics(tickets, today);
       const slaMetrics = aggregateSLAMetrics(tickets, today);
 
-      // 3. Store in Entity Storage
-      await storeMetrics(ENTITIES.DAILY_METRICS, `daily_${today}`, dailyMetrics);
+      // 3. Store in Entity Storage using $db.set(key, {data})
+      await $db.set(`daily_${today}`, { data: dailyMetrics });
+      console.info(`[InsightDesk] Stored daily metrics`);
 
-      for (const [category, data] of Object.entries(categoryMetrics)) {
-        const key = `cat_${today}_${sanitizeKey(category)}`;
-        await storeMetrics(ENTITIES.CATEGORY_METRICS, key, data);
-      }
+      await $db.set(`categories_${today}`, { data: categoryMetrics });
+      console.info(`[InsightDesk] Stored category metrics`);
 
-      for (const [agentId, data] of Object.entries(agentMetrics)) {
-        const key = `agent_${today}_${agentId}`;
-        await storeMetrics(ENTITIES.AGENT_METRICS, key, data);
-      }
+      await $db.set(`agents_${today}`, { data: agentMetrics });
+      console.info(`[InsightDesk] Stored agent metrics`);
 
-      for (const [priority, data] of Object.entries(slaMetrics)) {
-        const key = `sla_${today}_${priority}`;
-        await storeMetrics(ENTITIES.SLA_METRICS, key, data);
-      }
+      await $db.set(`sla_${today}`, { data: slaMetrics });
+      console.info(`[InsightDesk] Stored SLA metrics`);
+
+      // Store latest date reference
+      await $db.set('latest_date', { data: { date: today } });
 
       console.info(`[InsightDesk] Collection complete: ${tickets.length} tickets processed`);
     } catch (error) {
@@ -58,39 +56,30 @@ exports = {
 
   // SMI (Server Method Invocation) — called from frontend
   getMetrics: async function(args) {
-    const { entity, days } = args;
-    const results = [];
+    const results = {};
+    const days = (args && args.days) || 30;
     const now = new Date();
+    const prefixes = ['daily', 'categories', 'agents', 'sla'];
 
-    for (let i = 0; i < (days || 30); i++) {
+    for (let i = 0; i < days; i++) {
       const date = new Date(now);
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().split('T')[0];
 
-      try {
-        const key = entity === ENTITIES.DAILY_METRICS
-          ? `daily_${dateStr}`
-          : `${dateStr}`;
-        const record = await $db.read(entity, { key });
-        if (record) results.push(record);
-      } catch (e) {
-        // No data for this date, skip
+      for (const prefix of prefixes) {
+        try {
+          const record = await $db.get(`${prefix}_${dateStr}`);
+          if (record && record.data) {
+            if (!results[dateStr]) results[dateStr] = {};
+            results[dateStr][prefix === 'daily' ? 'daily' : prefix] = record.data;
+          }
+        } catch {
+          // No data for this date/prefix
+        }
       }
     }
 
     return { data: results };
-  },
-
-  getMetricsByPrefix: async function(args) {
-    const { entity, prefix } = args;
-    try {
-      const records = await $db.readAll(entity, {
-        query: { prefix }
-      });
-      return { data: records || [] };
-    } catch (e) {
-      return { data: [] };
-    }
   }
 };
 
@@ -101,18 +90,21 @@ async function fetchAllTickets() {
   let page = 1;
   let hasMore = true;
 
-  while (hasMore && page <= 10) { // Max 10 pages to stay within rate limits
+  while (hasMore && page <= 10) {
     try {
       const response = await $request.invokeTemplate('getFreshserviceTickets', {
         query: {
           per_page: 100,
           page: page,
-          include: 'stats',
-          updated_since: getYesterdayISO()
+          include: 'stats'
         }
       });
 
-      const body = JSON.parse(response.body);
+      console.info(`[InsightDesk] API response type: ${typeof response}, keys: ${Object.keys(response || {})}`);
+      const bodyStr = response.response || response.body || response;
+      console.info(`[InsightDesk] Body preview: ${String(bodyStr).substring(0, 200)}`);
+
+      const body = JSON.parse(bodyStr);
       if (body.tickets && body.tickets.length > 0) {
         tickets.push(...body.tickets);
         page++;
@@ -129,14 +121,13 @@ async function fetchAllTickets() {
 }
 
 function aggregateDailyMetrics(tickets, date) {
-  const open = tickets.filter(t => t.status !== 5).length; // 5 = Closed
+  const open = tickets.filter(t => t.status !== 5).length;
   const closed = tickets.filter(t => t.status === 5).length;
   const newTickets = tickets.filter(t => {
     const created = t.created_at.split('T')[0];
     return created === date;
   }).length;
 
-  // Calculate MTTR (Mean Time To Resolution) for closed tickets
   const resolvedTickets = tickets.filter(t => t.stats && t.stats.resolved_at);
   let mttrHours = 0;
   if (resolvedTickets.length > 0) {
@@ -148,12 +139,18 @@ function aggregateDailyMetrics(tickets, date) {
     mttrHours = Math.round((totalHours / resolvedTickets.length) * 10) / 10;
   }
 
+  // SLA compliance
+  const slaTotal = tickets.length;
+  const slaMet = tickets.filter(t => !t.is_escalated).length;
+  const slaPercent = slaTotal > 0 ? Math.round((slaMet / slaTotal) * 100) : 0;
+
   return {
     date,
     open_tickets: open,
     closed_tickets: closed,
     new_tickets: newTickets,
     mttr_hours: mttrHours,
+    sla_percent: slaPercent,
     total_processed: tickets.length
   };
 }
@@ -212,12 +209,3 @@ function aggregateSLAMetrics(tickets, date) {
   return priorities;
 }
 
-function sanitizeKey(str) {
-  return str.replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 30);
-}
-
-function getYesterdayISO() {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  return d.toISOString();
-}

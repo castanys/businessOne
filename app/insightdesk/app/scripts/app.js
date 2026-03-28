@@ -17,42 +17,30 @@ async function onAppActivated() {
   setStatus('Loading metrics...');
 
   try {
-    // Fetch daily metrics from serverless backend
-    const response = await client.request.invoke('getMetrics', {
-      entity: 'daily_metrics',
-      days: 30
-    });
+    const response = await client.request.invoke('getMetrics', { days: 30 });
+    const metricsData = response.response.data || {};
 
-    const dailyData = response.data || [];
+    const dates = Object.keys(metricsData).sort();
 
-    if (dailyData.length === 0) {
+    if (dates.length === 0) {
       setStatus('No data yet. Metrics will be collected daily by the scheduled job.');
       renderEmptyState();
       return;
     }
 
-    // Sort by date ascending
-    dailyData.sort(function(a, b) {
-      return a.date > b.date ? 1 : -1;
-    });
+    const dailyData = dates
+      .filter(function(d) { return metricsData[d].daily; })
+      .map(function(d) { return metricsData[d].daily; });
+
+    const latestDate = dates[dates.length - 1];
+    const categoryData = metricsData[latestDate].categories || {};
+    const agentData = metricsData[latestDate].agents || {};
 
     renderKPIs(dailyData);
     renderVolumeChart(dailyData);
     renderSLAChart(dailyData);
-
-    // Fetch category metrics
-    const catResponse = await client.request.invoke('getMetricsByPrefix', {
-      entity: 'category_metrics',
-      prefix: 'cat_'
-    });
-    renderCategoriesChart(catResponse.data || []);
-
-    // Fetch agent metrics
-    const agentResponse = await client.request.invoke('getMetricsByPrefix', {
-      entity: 'agent_metrics',
-      prefix: 'agent_'
-    });
-    renderAgentsChart(agentResponse.data || []);
+    renderCategoriesChart(categoryData);
+    renderAgentsChart(agentData);
 
     setStatus('Last updated: ' + new Date().toLocaleString());
   } catch (error) {
@@ -62,31 +50,22 @@ async function onAppActivated() {
   }
 }
 
-// --- KPI Rendering ---
-
 function renderKPIs(dailyData) {
   const latest = dailyData[dailyData.length - 1];
 
-  // Open tickets (latest)
   document.getElementById('kpi-open').textContent = latest.open_tickets || 0;
 
-  // Average new tickets per day
   const totalNew = dailyData.reduce(function(sum, d) { return sum + (d.new_tickets || 0); }, 0);
   const avgNew = dailyData.length > 0 ? Math.round(totalNew / dailyData.length * 10) / 10 : 0;
   document.getElementById('kpi-new').textContent = avgNew;
 
-  // MTTR
+  document.getElementById('kpi-sla').textContent = (latest.sla_percent || 0) + '%';
   document.getElementById('kpi-mttr').textContent = latest.mttr_hours || '--';
-
-  // SLA % (placeholder until SLA data loaded)
-  document.getElementById('kpi-sla').textContent = '--';
 }
-
-// --- Chart Rendering ---
 
 function renderVolumeChart(dailyData) {
   const ctx = document.getElementById('chart-volume').getContext('2d');
-  const labels = dailyData.map(function(d) { return d.date.substring(5); }); // MM-DD
+  const labels = dailyData.map(function(d) { return d.date.substring(5); });
   const openData = dailyData.map(function(d) { return d.open_tickets || 0; });
   const closedData = dailyData.map(function(d) { return d.closed_tickets || 0; });
 
@@ -126,20 +105,15 @@ function renderVolumeChart(dailyData) {
 function renderSLAChart(dailyData) {
   const ctx = document.getElementById('chart-sla').getContext('2d');
   const labels = dailyData.map(function(d) { return d.date.substring(5); });
-
-  // Placeholder: calculate SLA from open vs total
-  const slaData = dailyData.map(function(d) {
-    const total = (d.open_tickets || 0) + (d.closed_tickets || 0);
-    return total > 0 ? Math.round((d.closed_tickets || 0) / total * 100) : 0;
-  });
+  const slaValues = dailyData.map(function(d) { return d.sla_percent || 0; });
 
   charts.sla = new Chart(ctx, {
     type: 'line',
     data: {
       labels: labels,
       datasets: [{
-        label: 'Resolution Rate %',
-        data: slaData,
+        label: 'SLA Compliance %',
+        data: slaValues,
         borderColor: '#3498db',
         backgroundColor: 'rgba(52, 152, 219, 0.1)',
         fill: true,
@@ -159,20 +133,11 @@ function renderSLAChart(dailyData) {
 function renderCategoriesChart(catData) {
   const ctx = document.getElementById('chart-categories').getContext('2d');
 
-  // Aggregate by category
-  const catTotals = {};
-  catData.forEach(function(d) {
-    const cat = d.category || 'Unknown';
-    catTotals[cat] = (catTotals[cat] || 0) + (d.count || 0);
-  });
+  const entries = Object.values(catData);
+  const sorted = entries.sort(function(a, b) { return b.count - a.count; }).slice(0, 10);
 
-  // Sort and take top 10
-  const sorted = Object.entries(catTotals)
-    .sort(function(a, b) { return b[1] - a[1]; })
-    .slice(0, 10);
-
-  const labels = sorted.map(function(e) { return e[0]; });
-  const data = sorted.map(function(e) { return e[1]; });
+  const labels = sorted.map(function(e) { return e.category; });
+  const data = sorted.map(function(e) { return e.count; });
   const colors = ['#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#9b59b6',
                 '#1abc9c', '#e67e22', '#34495e', '#16a085', '#c0392b'];
 
@@ -199,25 +164,15 @@ function renderCategoriesChart(catData) {
 function renderAgentsChart(agentData) {
   const ctx = document.getElementById('chart-agents').getContext('2d');
 
-  // Aggregate by agent
-  const agentTotals = {};
-  agentData.forEach(function(d) {
-    const id = d.agent_id || 'unassigned';
-    if (!agentTotals[id]) {
-      agentTotals[id] = { assigned: 0, resolved: 0, open: 0 };
-    }
-    agentTotals[id].assigned += d.assigned || 0;
-    agentTotals[id].resolved += d.resolved || 0;
-    agentTotals[id].open += d.open || 0;
+  const entries = Object.values(agentData);
+  const sorted = entries.sort(function(a, b) { return b.assigned - a.assigned; }).slice(0, 10);
+
+  const labels = sorted.map(function(e) {
+    const id = String(e.agent_id);
+    return id === 'unassigned' ? 'Unassigned' : 'Agent ' + id.substring(0, 8);
   });
-
-  const sorted = Object.entries(agentTotals)
-    .sort(function(a, b) { return b[1].assigned - a[1].assigned; })
-    .slice(0, 10);
-
-  const labels = sorted.map(function(e) { return 'Agent ' + e[0].substring(0, 8); });
-  const assignedData = sorted.map(function(e) { return e[1].assigned; });
-  const resolvedData = sorted.map(function(e) { return e[1].resolved; });
+  const assignedData = sorted.map(function(e) { return e.assigned; });
+  const resolvedData = sorted.map(function(e) { return e.resolved; });
 
   charts.agents = new Chart(ctx, {
     type: 'bar',

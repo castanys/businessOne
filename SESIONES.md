@@ -2,13 +2,61 @@
 
 **Propósito**: Últimas 3 sesiones completadas (detalle operativo).
 
-**Última actualización**: 2026-03-27
+**Última actualización**: 2026-03-28
 
 **Nota**: Estado mínimo y pendientes → leer `ESTADO.md`
 
 ---
 
 ## Últimas 3 Sesiones
+
+### S2 cont. — 2026-03-28 — BACKEND + DEPLOY CUSTOM APP
+
+**Objetivo**: Verificar backend con datos reales, deploy como custom app.
+**Resultado**: Backend OK, deploy bloqueado en "Promote to Live"
+
+**Backend corregido y verificado:**
+- server.js: reescrito con API correcta `$db.set()`/`$db.get()` (antes usaba API inexistente)
+- server.js: añadida función `storeMetrics`, quitado `updated_since` filter, mejor logging
+- requests.json: fix auth header `encode(key + ':X')`
+- app.js: reescrito frontend para nueva estructura de datos del SMI
+- onScheduledEvent simulado OK: 15 tickets procesados, métricas almacenadas
+
+**15 tickets de prueba creados via API:**
+- Variedad: Hardware(4), Software(6), Network(5)
+- Prioridades: Urgente(3), Alta(3), Media(5), Baja(3)
+- Estados: Open(7), Pending(2), Resolved(3), Closed(3)
+
+**Custom app empaquetada y subida:**
+- Node 24.11.1 + FDK v10.0.1 instalados (Freshworks exige Node 24 para Platform 3.0)
+- `fdk pack --skip-coverage` → `dist/insightdesk.zip`
+- App subida al Developer Portal (App ID: 395129)
+- iparams configurados e instalada en cuenta trial
+- BLOQUEADO: "Promote to Live" da error en UI del Developer Portal
+
+**Playwright MCP — lección aprendida:**
+- En VS Code extension, cada proyecto necesita su propio `.mcp.json` — el global NO se hereda
+- Configuración final en `.mcp.json` del proyecto con Node v22 y perfil global
+
+---
+
+### S2 — 2026-03-27 — TESTING + BUG FIX + PLAYWRIGHT MCP
+
+**Objetivo**: Testear app InsightDesk contra insightdesk.freshservice.com, resolver warnings.
+**Resultado**: COMPLETADA
+
+**Bug crítico resuelto:**
+- app.js tenía todas las `const` sin espacio — reescritura completa
+
+**Testing exitoso:**
+- App renderiza en Freshservice (4 KPIs + 4 charts)
+- API key obtenida y activada
+
+**Playwright MCP configurado** | **Warnings 38 → 4**
+
+**Commits:** 1 (`ddba644`)
+
+---
 
 ### S1 — 2026-03-27 — INVESTIGACIÓN + MVP + SCAFFOLDING
 

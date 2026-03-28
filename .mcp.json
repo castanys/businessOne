@@ -1,17 +1,22 @@
 {
   "mcpServers": {
+    "knowledge": {
+      "command": "python",
+      "args": ["c:/Users/casta/proyectos/jobExtractor/mcp_server.py"],
+      "cwd": "c:/Users/casta/proyectos/jobExtractor"
+    },
     "playwright": {
       "command": "npx",
       "args": [
         "@playwright/mcp",
         "--browser", "msedge",
         "--caps", "vision,pdf",
-        "--user-data-dir", "c:/Users/casta/proyectos/businessOne/data/browser_profile",
         "--ignore-https-errors",
-        "--output-dir", "c:/Users/casta/proyectos/businessOne/data/playwright_output"
+        "--user-data-dir", "C:\\Users\\casta\\.claude\\browser_profile",
+        "--args", "--allow-running-insecure-content"
       ],
       "env": {
-        "PATH": "C:\\Users\\casta\\AppData\\Local\\nvm\\v18.20.8;C:\\Windows\\system32;C:\\Windows"
+        "PATH": "C:\\Users\\casta\\AppData\\Local\\nvm\\v22.18.0;C:\\Users\\casta\\AppData\\Roaming\\npm;C:\\Windows\\system32;C:\\Windows"
       }
     }
   }

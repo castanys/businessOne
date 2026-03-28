@@ -2,7 +2,7 @@
 
 **Propósito**: Estado mínimo del proyecto — lo que Claude debe saber antes de empezar una sesión.
 
-**Última actualización**: 2026-03-27 — S1 completada
+**Última actualización**: 2026-03-28 — S2 completada (continuación)
 
 ---
 
@@ -10,9 +10,9 @@
 
 | Métrica | Valor |
 |---------|-------|
-| **Estado** | Fase 1: MVP en desarrollo |
+| **Estado** | Fase 1: MVP backend verificado, deploy pendiente |
 | **Producto** | InsightDesk — Freshservice Analytics App |
-| **Trial FS** | insightdesk.freshservice.com (14 días desde 2026-03-27) |
+| **Trial FS** | insightdesk.freshservice.com (~13 días restantes) |
 | **Revenue** | $0 |
 
 ---
@@ -27,11 +27,10 @@
 
 | Prioridad | Tarea | Notas |
 |-----------|-------|-------|
-| ALTA | Testing app con `fdk run` contra insightdesk.freshservice.com | Necesita API key de FS |
-| ALTA | Solicitar developer subscription (trial expira en 14 días) | Email a paid-apps@community.freshworks.dev |
-| MEDIA | Resolver warnings del linter (38 warnings) | No bloqueantes pero necesarios para review |
-| MEDIA | Preparar assets y listing para marketplace | Logo, screenshots, descripción |
-| BAJA | Activar `nvm use 18` como admin para simplificar workflow | Actualmente usando path directo a Node 18 |
+| ALTA | Promote to Live en Developer Portal | App custom subida e instalada pero no promovida — UI da error |
+| ALTA | Solicitar developer subscription (trial expira ~13 días) | Email a paid-apps@community.freshworks.dev |
+| MEDIA | Preparar assets y listing para marketplace | Logo e icono ya creados, falta screenshot real |
+| BAJA | Limpiar Node versions (18, 22, 24.11, 24.14) | FDK v10 requiere Node 24.11.x |
 
 **Nota**: Borrar pendientes cuando se completen. No acumular aquí.
 
@@ -41,4 +40,6 @@
 
 | Sesión | Fecha | Resultado | Cambios |
 |--------|-------|-----------|---------|
+| S2 cont. | 2026-03-28 | Backend OK, deploy bloqueado | server.js reescrito + app empaquetada Node 24 + custom app subida |
+| S2 | 2026-03-27 | COMPLETADA | Bug fix app.js + app renderiza en FS + Playwright MCP conectado |
 | S1 | 2026-03-27 | COMPLETADA | Investigación mercado + MVP diseñado + app scaffolding completo |
