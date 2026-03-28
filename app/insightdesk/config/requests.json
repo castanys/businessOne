@@ -5,6 +5,11 @@
       "protocol": "https",
       "host": "<%= iparam.freshservice_domain %>.freshservice.com",
       "path": "/api/v2/tickets",
+      "query": {
+        "per_page": "<%= context.per_page %>",
+        "page": "<%= context.page %>",
+        "include": "<%= context.include %>"
+      },
       "headers": {
         "Authorization": "Basic <%= encode(iparam.freshservice_api_key + ':X') %>",
         "Content-Type": "application/json"
