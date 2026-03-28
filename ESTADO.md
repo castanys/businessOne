@@ -2,7 +2,7 @@
 
 **Propósito**: Estado mínimo del proyecto — lo que Claude debe saber antes de empezar una sesión.
 
-**Última actualización**: 2026-03-28 — S2 completada (continuación)
+**Última actualización**: 2026-03-28 — S3
 
 ---
 
@@ -10,7 +10,7 @@
 
 | Métrica | Valor |
 |---------|-------|
-| **Estado** | Fase 1: MVP backend verificado, deploy pendiente |
+| **Estado** | Fase 1: App publicada e instalada en Freshservice |
 | **Producto** | InsightDesk — Freshservice Analytics App |
 | **Trial FS** | insightdesk.freshservice.com (~13 días restantes) |
 | **Revenue** | $0 |
@@ -27,8 +27,8 @@
 
 | Prioridad | Tarea | Notas |
 |-----------|-------|-------|
-| ALTA | Promote to Live en Developer Portal | App custom subida e instalada pero no promovida — UI da error |
 | ALTA | Solicitar developer subscription (trial expira ~13 días) | Email a paid-apps@community.freshworks.dev |
+| MEDIA | Verificar que la app funciona end-to-end en FS | Instalada con dominio + API key, pendiente prueba real |
 | MEDIA | Preparar assets y listing para marketplace | Logo e icono ya creados, falta screenshot real |
 | BAJA | Limpiar Node versions (18, 22, 24.11, 24.14) | FDK v10 requiere Node 24.11.x |
 
@@ -40,6 +40,6 @@
 
 | Sesión | Fecha | Resultado | Cambios |
 |--------|-------|-----------|---------|
+| S3 | 2026-03-28 | App publicada + instalada en FS | Promoted to Live + instalada con API key |
 | S2 cont. | 2026-03-28 | Backend OK, deploy bloqueado | server.js reescrito + app empaquetada Node 24 + custom app subida |
 | S2 | 2026-03-27 | COMPLETADA | Bug fix app.js + app renderiza en FS + Playwright MCP conectado |
-| S1 | 2026-03-27 | COMPLETADA | Investigación mercado + MVP diseñado + app scaffolding completo |

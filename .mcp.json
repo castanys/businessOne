@@ -6,14 +6,13 @@
       "cwd": "c:/Users/casta/proyectos/jobExtractor"
     },
     "playwright": {
-      "command": "npx",
+      "command": "node",
       "args": [
-        "@playwright/mcp",
+        "C:\\Users\\casta\\AppData\\Roaming\\npm\\node_modules\\@playwright\\mcp\\cli.js",
         "--browser", "msedge",
         "--caps", "vision,pdf",
         "--ignore-https-errors",
-        "--user-data-dir", "C:\\Users\\casta\\.claude\\browser_profile",
-        "--args", "--allow-running-insecure-content"
+        "--user-data-dir", "C:\\Users\\casta\\.claude\\browser_profile"
       ],
       "env": {
         "PATH": "C:\\Users\\casta\\AppData\\Local\\nvm\\v22.18.0;C:\\Users\\casta\\AppData\\Roaming\\npm;C:\\Windows\\system32;C:\\Windows"
