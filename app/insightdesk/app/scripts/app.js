@@ -30,7 +30,19 @@ function init() {
 
 function onAppActivated() {
   setStatus('Loading metrics...');
+  loadHistoricalData();
   fetchPage(1, []);
+}
+
+function loadHistoricalData() {
+  client.request.invoke('getMetrics', { days: 30 })
+    .then(function(result) {
+      const data = (result && result.response && result.response.data) || {};
+      renderHistoricalChart(data);
+    })
+    .catch(function() {
+      renderHistoricalChart({});
+    });
 }
 
 function fetchPage(page, accumulated) {
@@ -434,6 +446,54 @@ function renderProblemTable(problems) {
   });
   html += '</tbody></table>';
   container.innerHTML = html;
+}
+
+function renderHistoricalChart(historicalData) {
+  const canvas = document.getElementById('chart-historical');
+  const emptyEl = document.getElementById('historical-empty');
+  const dates = Object.keys(historicalData).sort();
+
+  if (dates.length === 0) {
+    canvas.style.display = 'none';
+    emptyEl.style.display = 'block';
+    return;
+  }
+
+  const labels = dates.map(function(d) { return d.substring(5); });
+  const openData = dates.map(function(d) {
+    const day = historicalData[d] && historicalData[d].daily;
+    return day ? day.open_tickets : null;
+  });
+  const slaData = dates.map(function(d) {
+    const day = historicalData[d] && historicalData[d].daily;
+    return day ? day.sla_percent : null;
+  });
+  const newData = dates.map(function(d) {
+    const day = historicalData[d] && historicalData[d].daily;
+    return day ? day.new_tickets : null;
+  });
+
+  charts.historical = new Chart(canvas.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'Open Tickets', data: openData, borderColor: '#e74c3c', backgroundColor: 'rgba(231,76,60,0.08)', fill: true, tension: 0.3, borderWidth: 2, pointRadius: 3, yAxisID: 'y-left' },
+        { label: 'New / day', data: newData, borderColor: '#3498db', backgroundColor: 'transparent', fill: false, tension: 0.3, borderWidth: 2, pointRadius: 2, yAxisID: 'y-left' },
+        { label: 'SLA %', data: slaData, borderColor: '#2ecc71', backgroundColor: 'transparent', fill: false, tension: 0.3, borderWidth: 2, pointRadius: 2, yAxisID: 'y-right' }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        yAxes: [
+          { id: 'y-left', position: 'left', ticks: { beginAtZero: true } },
+          { id: 'y-right', position: 'right', ticks: { min: 0, max: 100 }, gridLines: { drawOnChartArea: false } }
+        ]
+      },
+      legend: { position: 'bottom', labels: { boxWidth: 12, fontSize: 11 } }
+    }
+  });
 }
 
 function setStatus(text) {
